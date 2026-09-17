@@ -1,0 +1,2174 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Logbook immersioni — Alessio Bertolani</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Semi+Condensed:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050607; --panel:#101314; --field:#181c1e; --bar:#23282b; --edge:#2e3437;
+  --txt:#f2f5f6; --label:#98a3a8; --muted:#6f7a7f;
+  --gr:#1fc17a; --bl:#29a8e0; --rd:#e0453a; --or:#e8a33d; --yl:#e8c63d; --cy:#56c5d0;
+  --shadow:none;
+}
+:root[data-theme="light"]{
+  --bg:#f4f6f8; --panel:#ffffff; --field:#ffffff; --bar:#e4eaf0; --edge:#ccd5dd;
+  --txt:#101820; --label:#5b6670; --muted:#79848d;
+  --gr:#0e8f58; --bl:#1a6fa0; --rd:#b5342a; --or:#9c6410; --yl:#8a6d10; --cy:#17727c;
+  --shadow:0 1px 2px rgba(16,24,32,.06);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{margin:0;background:var(--bg);color:var(--txt);
+  font-family:"Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;font-size:16px;line-height:1.45}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px 80px}
+
+/* top bar */
+.top{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--edge);
+  display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 20px;margin-bottom:0}
+.top .brand{font-weight:700;font-size:1.05rem;letter-spacing:.01em}
+.top .who{color:var(--label);font-family:"Barlow Semi Condensed";font-size:.95rem}
+.top .spacer{flex:1}
+button{font:inherit;color:var(--txt);background:var(--field);border:1px solid var(--edge);
+  border-radius:6px;padding:7px 13px;cursor:pointer}
+button:hover{border-color:var(--bl)}
+button:focus-visible,tr:focus-visible{outline:2px solid var(--bl);outline-offset:2px}
+
+/* hero */
+.hero{padding:44px 0 28px;border-bottom:1px solid var(--edge)}
+.hero h1{margin:0;font-size:clamp(2rem,5vw,3.1rem);font-weight:700;letter-spacing:-.02em;line-height:1.05}
+.hero p{margin:10px 0 0;color:var(--label);max-width:62ch}
+.hero .meta{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;
+  font-family:"Barlow Semi Condensed";color:var(--label);font-size:.95rem}
+.hero .meta b{color:var(--txt);font-weight:600}
+.chip{border:1px solid var(--edge);border-radius:999px;padding:4px 12px;background:var(--panel)}
+
+/* stats */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:26px 0 8px}
+.stat{background:var(--panel);border:1px solid var(--edge);border-radius:8px;padding:14px 16px;box-shadow:var(--shadow)}
+.stat b{display:block;font-size:1.8rem;font-weight:700;line-height:1.1}
+.stat span{display:block;margin-top:2px;color:var(--label);font-family:"Barlow Semi Condensed";font-size:.9rem}
+.stat.acc b{color:var(--bl)}
+
+h2{font-size:1.35rem;font-weight:600;margin:42px 0 14px;letter-spacing:-.01em}
+
+/* index */
+.tablewrap{overflow-x:auto;border:1px solid var(--edge);border-radius:8px;background:var(--panel)}
+table{border-collapse:collapse;width:100%;min-width:640px}
+th,td{padding:9px 14px;text-align:left;border-bottom:1px solid var(--edge);white-space:nowrap}
+th{background:var(--bar);color:var(--label);font-family:"Barlow Semi Condensed";
+  font-weight:600;font-size:.9rem;position:sticky;top:0}
+tbody tr{cursor:pointer}
+tbody tr:hover{background:var(--field)}
+tbody tr:last-child td{border-bottom:0}
+td.n{font-weight:700;width:1%}
+td.site{font-weight:600;white-space:normal}
+td.r{text-align:right;font-variant-numeric:tabular-nums}
+td.cum{color:var(--cy)}
+td.nx{color:var(--gr);font-weight:600}
+
+/* dive card */
+.dive{margin:22px 0;border:1px solid var(--edge);border-radius:10px;overflow:hidden;background:var(--panel);box-shadow:var(--shadow)}
+.dh{background:var(--bar);padding:13px 18px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+.dh h3{margin:0;font-size:1.22rem;font-weight:600;letter-spacing:-.01em}
+.dh .sep{color:var(--muted);font-weight:400}
+.dh time{margin-left:auto;color:var(--gr);font-weight:600;font-family:"Barlow Semi Condensed"}
+
+.summary{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr auto;gap:1px;background:var(--edge);border-bottom:1px solid var(--edge)}
+.s{background:var(--panel);padding:14px 18px;text-align:center}
+.s b{display:block;font-size:1.35rem;font-weight:700}
+.s.big b{font-size:1.85rem}
+.s b.bl{color:var(--bl)}
+.s span{display:block;color:var(--label);font-family:"Barlow Semi Condensed";font-size:.85rem;margin-top:2px}
+.s.qr{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:104px}
+.qrbox{width:64px;height:64px;background:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;padding:4px}
+.qrbox img,.qrbox canvas{width:100%;height:100%;display:block}
+
+.course{background:color-mix(in srgb,var(--rd) 12%,var(--panel));border-bottom:1px solid var(--edge);
+  padding:11px 18px;display:flex;flex-direction:column;gap:2px}
+.course span{color:var(--label);font-family:"Barlow Semi Condensed";font-size:.88rem}
+.course b{font-weight:600}
+
+.panel{border-bottom:1px solid var(--edge)}
+.panel:last-of-type{border-bottom:0}
+.panel h4{margin:0;padding:9px 18px;background:var(--bar);font-size:.92rem;font-weight:600;
+  font-family:"Barlow Semi Condensed";letter-spacing:.02em}
+.panel.blue h4{box-shadow:inset 3px 0 0 var(--bl)}
+.panel.green h4{box-shadow:inset 3px 0 0 var(--gr)}
+.grid{display:grid;gap:1px;background:var(--edge)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+.f{background:var(--field);padding:10px 18px;min-width:0}
+.span2{grid-column:span 2}
+.span3{grid-column:span 3}
+.fl{display:block;color:var(--label);font-family:"Barlow Semi Condensed";font-size:.84rem}
+.fl i{font-style:normal;margin-right:6px}
+.fv{display:block;font-weight:600;overflow-wrap:anywhere}
+i.gr{color:var(--gr)}i.bl{color:var(--bl)}i.rd{color:var(--rd)}i.or{color:var(--or)}
+i.yl{color:var(--yl)}i.cy{color:var(--cy)}i.gy{color:var(--muted)}
+
+.sign{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--edge);border-top:1px solid var(--edge)}
+.sign div{background:var(--field);padding:14px 18px 26px}
+.sign span{color:var(--label);font-family:"Barlow Semi Condensed";font-size:.84rem}
+.sign hr{border:0;border-top:1px solid var(--muted);margin:34px 0 0}
+
+footer{margin-top:44px;padding-top:18px;border-top:1px solid var(--edge);color:var(--muted);font-size:.9rem}
+footer a{color:var(--bl)}
+
+@media (max-width:860px){
+  .summary{grid-template-columns:1fr 1fr}
+  .g4,.g3{grid-template-columns:repeat(2,1fr)}
+  .span3,.span2{grid-column:span 2}
+  .sign{grid-template-columns:1fr}
+}
+@media (max-width:520px){
+  .g4,.g3,.g2{grid-template-columns:1fr}
+  .span3,.span2{grid-column:span 1}
+  .summary{grid-template-columns:1fr 1fr}
+}
+
+@media print{
+  :root{--bg:#fff;--panel:#fff;--field:#fff;--bar:#eef2f6;--edge:#b9c3cc;
+    --txt:#000;--label:#444;--muted:#666;--shadow:none}
+  .top,.hero p,.noprint{display:none}
+  .dive{break-inside:avoid;page-break-after:always;margin:0 0 12px}
+  body{font-size:11px}
+}
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <span class="brand">Logbook immersioni</span>
+  <span class="who">Alessio Bertolani · RAID IT24-621-392</span>
+  <span class="spacer"></span>
+  <button id="theme" type="button">Passa al tema chiaro</button>
+  <button onclick="window.print()" type="button">Stampa</button>
+</nav>
+
+<div class="wrap">
+  <header class="hero">
+    <h1>20 immersioni, 13h 33m sott'acqua</h1>
+    <p>Registro completo delle immersioni certificate RAID, con i dati di ogni tuffo e lo spazio
+       per la firma del compagno e il timbro del diving center.</p>
+    <div class="meta">
+      <span class="chip">Brevetto <b>Advanced</b></span>
+      <span class="chip">Tessera <b>IT24-621-392</b></span>
+      <span class="chip">Dal <b>01/06/2024</b> al <b>13/07/2026</b></span>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><b>20</b><span>Immersioni</span></div>
+      <div class="stat acc"><b>13h 33m</b><span>Tempo totale</span></div>
+      <div class="stat"><b>34,8 m</b><span>Profondità massima</span></div>
+      <div class="stat"><b>13,9 m</b><span>Profondità media</span></div>
+      <div class="stat"><b>19</b><span>Siti diversi</span></div>
+      <div class="stat"><b>3</b><span>Con Nitrox</span></div>
+      <div class="stat"><b>4 / 15 / 1</b><span>Barca / riva / piscina</span></div>
+      <div class="stat"><b>6</b><span>Di corso</span></div>
+    </div>
+  </header>
+
+  <h2>Indice</h2>
+  <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th>N.</th><th>Data</th><th>Località</th>
+        <th style="text-align:right">Prof. max</th>
+        <th style="text-align:right">Tempo</th>
+        <th style="text-align:right">Cumulato</th>
+        <th>Miscela</th>
+      </tr></thead>
+      <tbody><tr tabindex="0" role="link" data-go="dive-1">
+    <td class="n">1</td>
+    <td>01/06/2024</td>
+    <td class="site">Isolotto Argentario</td>
+    <td class="r">12 m</td>
+    <td class="r">25 min</td>
+    <td class="r cum">0h 25m</td>
+    <td class="">Aria</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-2">
+    <td class="n">2</td>
+    <td>01/06/2024</td>
+    <td class="site">Isolotto Argentario</td>
+    <td class="r">12 m</td>
+    <td class="r">30 min</td>
+    <td class="r cum">0h 55m</td>
+    <td class="">Aria</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-3">
+    <td class="n">3</td>
+    <td>02/06/2024</td>
+    <td class="site">Giannutri (secca di Punta Secca)</td>
+    <td class="r">18 m</td>
+    <td class="r">30 min</td>
+    <td class="r cum">1h 25m</td>
+    <td class="">Aria</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-4">
+    <td class="n">4</td>
+    <td>02/06/2024</td>
+    <td class="site">Giannutri (Le Scalette)</td>
+    <td class="r">18 m</td>
+    <td class="r">45 min</td>
+    <td class="r cum">2h 10m</td>
+    <td class="">Aria</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-5">
+    <td class="n">5</td>
+    <td>20/07/2024</td>
+    <td class="site">Cristo degli Abissi</td>
+    <td class="r">20 m</td>
+    <td class="r">40 min</td>
+    <td class="r cum">2h 50m</td>
+    <td class="">Aria</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-6">
+    <td class="n">6</td>
+    <td>20/07/2024</td>
+    <td class="site">Punta Vessinaro (Portofino)</td>
+    <td class="r">20 m</td>
+    <td class="r">30 min</td>
+    <td class="r cum">3h 20m</td>
+    <td class="">Aria</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-7">
+    <td class="n">7</td>
+    <td>08/09/2024</td>
+    <td class="site">Punta Giglio (Alghero)</td>
+    <td class="r">16 m</td>
+    <td class="r">45 min</td>
+    <td class="r cum">4h 05m</td>
+    <td class="">Aria</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-8">
+    <td class="n">8</td>
+    <td>08/09/2024</td>
+    <td class="site">Madonnina (Capo Caccia, Alghero)</td>
+    <td class="r">20,3 m</td>
+    <td class="r">43 min</td>
+    <td class="r cum">4h 48m</td>
+    <td class="">Aria</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-9">
+    <td class="n">9</td>
+    <td>08/12/2024</td>
+    <td class="site">Y-40 (Montegrotto Terme)</td>
+    <td class="r">20,4 m</td>
+    <td class="r">50 min</td>
+    <td class="r cum">5h 38m</td>
+    <td class="">Aria</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-10">
+    <td class="n">10</td>
+    <td>30/05/2025</td>
+    <td class="site">Isola dei Cavoli (Villasimius, Sardegna)</td>
+    <td class="r">20 m</td>
+    <td class="r">42 min</td>
+    <td class="r cum">6h 20m</td>
+    <td class="">Aria</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-11">
+    <td class="n">11</td>
+    <td>07/08/2025</td>
+    <td class="site">Cristo degli Abissi (Portofino)</td>
+    <td class="r">18,8 m</td>
+    <td class="r">50 min</td>
+    <td class="r cum">7h 10m</td>
+    <td class="">Aria</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-12">
+    <td class="n">12</td>
+    <td>07/08/2025</td>
+    <td class="site">Altare (Portofino)</td>
+    <td class="r">21,2 m</td>
+    <td class="r">45 min</td>
+    <td class="r cum">7h 55m</td>
+    <td class="">Aria</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-13">
+    <td class="n">13</td>
+    <td>17/10/2025</td>
+    <td class="site">Bergeggi #1</td>
+    <td class="r">29,3 m</td>
+    <td class="r">50 min</td>
+    <td class="r cum">8h 45m</td>
+    <td class="">Aria</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-14">
+    <td class="n">14</td>
+    <td>13/06/2026</td>
+    <td class="site">Isola di Giannutri</td>
+    <td class="r">25 m</td>
+    <td class="r">34 min</td>
+    <td class="r cum">9h 19m</td>
+    <td class="">Aria</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-15">
+    <td class="n">15</td>
+    <td>13/06/2026</td>
+    <td class="site">Archetti, Isola di Giannutri</td>
+    <td class="r">34,8 m</td>
+    <td class="r">33 min</td>
+    <td class="r cum">9h 52m</td>
+    <td class="">Aria</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-16">
+    <td class="n">16</td>
+    <td>13/06/2026</td>
+    <td class="site">Bergeggi</td>
+    <td class="r">18 m</td>
+    <td class="r">56 min</td>
+    <td class="r cum">10h 48m</td>
+    <td class="">Aria</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-17">
+    <td class="n">17</td>
+    <td>14/06/2026</td>
+    <td class="site">Punta Secca, Giannutri</td>
+    <td class="r">34,4 m</td>
+    <td class="r">34 min</td>
+    <td class="r cum">11h 22m</td>
+    <td class="nx">Nitrox 30 %</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-18">
+    <td class="n">18</td>
+    <td>14/06/2026</td>
+    <td class="site">Le Scalette, Giannutri</td>
+    <td class="r">31,2 m</td>
+    <td class="r">41 min</td>
+    <td class="r cum">12h 03m</td>
+    <td class="nx">Nitrox 34 %</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-19">
+    <td class="n">19</td>
+    <td>12/07/2026</td>
+    <td class="site">Il Diamante (Portofino)</td>
+    <td class="r">31,6 m</td>
+    <td class="r">43 min</td>
+    <td class="r cum">12h 46m</td>
+    <td class="">Aria</td>
+  </tr>
+<tr tabindex="0" role="link" data-go="dive-20">
+    <td class="n">20</td>
+    <td>13/07/2026</td>
+    <td class="site">Secca Gonzatti (Portofino)</td>
+    <td class="r">28 m</td>
+    <td class="r">47 min</td>
+    <td class="r cum">13h 33m</td>
+    <td class="nx">Nitrox 31 %</td>
+  </tr></tbody>
+    </table>
+  </div>
+
+  <h2>Schede immersione</h2>
+  
+<article class="dive" id="dive-1">
+  <header class="dh">
+    <h3>Immersione 1 <span class="sep">—</span> Isolotto Argentario</h3>
+    <time>01/06/2024 08:00</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>12 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">25 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">25 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="1"></div><span>Scheda online</span></div>
+  </div>
+
+  
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">1</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">01/06/2024 08:00</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da riva</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Isolotto Argentario</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">24 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">20 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Nessuna corrente</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">8 kg</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">25 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">12 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">8 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">Sì</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">1 x 15 L</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">200 bar</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">100 bar</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Aria</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">21 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">79 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Annalisa Boni</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-2">
+  <header class="dh">
+    <h3>Immersione 2 <span class="sep">—</span> Isolotto Argentario</h3>
+    <time>01/06/2024 10:00</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>12 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">30 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">30 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="2"></div><span>Scheda online</span></div>
+  </div>
+
+  
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">2</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">01/06/2024 10:00</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da riva</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Isolotto Argentario</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">24 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">18 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Nessuna corrente</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">8 kg</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">30 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">12 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">8 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">Sì</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">1 x 15 L</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">200 bar</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">70 bar</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Aria</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">21 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">79 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Annalisa Boni</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">Onda Anomala</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-3">
+  <header class="dh">
+    <h3>Immersione 3 <span class="sep">—</span> Giannutri (secca di Punta Secca)</h3>
+    <time>02/06/2024 08:00</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>18 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">30 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">30 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="3"></div><span>Scheda online</span></div>
+  </div>
+
+  
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">3</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">02/06/2024 08:00</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da riva</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Giannutri (secca di Punta Secca)</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">18 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">19 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Nessuna corrente</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">Buone</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm, 7kg, ricreativa</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">30 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">18 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">10 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">No</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">1 x 15 L</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Aria</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">21 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">79 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Corso Open Water 20</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">Kiko Boni</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-4">
+  <header class="dh">
+    <h3>Immersione 4 <span class="sep">—</span> Giannutri (Le Scalette)</h3>
+    <time>02/06/2024 08:00</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>18 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">45 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">45 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="4"></div><span>Scheda online</span></div>
+  </div>
+
+  
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">4</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">02/06/2024 08:00</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da riva</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Giannutri (Le Scalette)</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">18 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">18 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Nessuna corrente</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">Buone, pioggia</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm, 7kg</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">45 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">18 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">10 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">No</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">1 x 15 L</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Aria</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">21 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">79 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Corso Open Water 20</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">Kiko Boni</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-5">
+  <header class="dh">
+    <h3>Immersione 5 <span class="sep">—</span> Cristo degli Abissi</h3>
+    <time>20/07/2024</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>20 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">40 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">40 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="5"></div><span>Scheda online</span></div>
+  </div>
+
+  
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">5</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">20/07/2024</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da riva</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Cristo degli Abissi</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">18 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">19 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Nessuna corrente</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">Ottime</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm, pesi 8kg</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">40 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">20 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">15 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">No</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">1 x 15 L</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Aria</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">21 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">79 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Annalisa Boni</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">Onda Anomala Diving School</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-6">
+  <header class="dh">
+    <h3>Immersione 6 <span class="sep">—</span> Punta Vessinaro (Portofino)</h3>
+    <time>20/07/2024</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>20 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">30 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">30 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="6"></div><span>Scheda online</span></div>
+  </div>
+
+  
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">6</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">20/07/2024</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da riva</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Punta Vessinaro (Portofino)</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">18 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">19 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Nessuna corrente</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">Ottimo</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm, 7kg</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">30 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">20 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">15 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">No</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">1 x 15 L</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Aria</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">21 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">79 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Annalisa Boni</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">Onda Anomala Diving School</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-7">
+  <header class="dh">
+    <h3>Immersione 7 <span class="sep">—</span> Punta Giglio (Alghero)</h3>
+    <time>08/09/2024 10:25</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>16 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">45 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">45 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="7"></div><span>Scheda online</span></div>
+  </div>
+
+  
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">7</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">08/09/2024 10:25</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da riva</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Punta Giglio (Alghero)</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">30 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">22 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Nessuna corrente</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">Visibilità 18m</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm, bombola 12lt</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">5 kg</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">45 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">16 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">14 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">Sì</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">1 x 12 L</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">200 bar</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">50 bar</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Aria</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">21 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">79 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Annalisa Boni</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">Sandalia Diving Center (Duccio)</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-8">
+  <header class="dh">
+    <h3>Immersione 8 <span class="sep">—</span> Madonnina (Capo Caccia, Alghero)</h3>
+    <time>08/09/2024 10:29</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>20,3 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">43 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">43 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="8"></div><span>Scheda online</span></div>
+  </div>
+
+  
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">8</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">08/09/2024 10:29</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da riva</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Madonnina (Capo Caccia, Alghero)</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">25 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">22 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Nessuna corrente</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm, bombola 12lt</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">5 kg</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">43 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">20,3 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">12 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">Sì</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">1 x 12 L</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">200 bar</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">50 bar</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Aria</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">21 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">79 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Annalisa Boni</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">Sandalia Diving Center (Duccio)</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-9">
+  <header class="dh">
+    <h3>Immersione 9 <span class="sep">—</span> Y-40 (Montegrotto Terme)</h3>
+    <time>08/12/2024 10:34</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>20,4 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">50 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">50 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="9"></div><span>Scheda online</span></div>
+  </div>
+
+  
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">9</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">08/12/2024 10:34</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione in piscina</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Y-40 (Montegrotto Terme)</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">30 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">33 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Nessuna corrente</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm, bombola 12lt</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">0 kg</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">50 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">20,4 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">15 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">No</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">1 x 12 L</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">200 bar</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">50 bar</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Aria</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">21 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">79 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Annalisa Boni</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">Onda Anomala Diving School</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-10">
+  <header class="dh">
+    <h3>Immersione 10 <span class="sep">—</span> Isola dei Cavoli (Villasimius, Sardegna)</h3>
+    <time>30/05/2025 13:18</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>20 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">42 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">42 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="10"></div><span>Scheda online</span></div>
+  </div>
+
+  
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">10</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">30/05/2025 13:18</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da riva</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Isola dei Cavoli (Villasimius, Sardegna)</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">23 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">19 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Nessuna corrente</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">5 kg</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">42 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">20 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">14,6 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">Sì</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">1 x 15 L</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">200 bar</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">60 bar</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Aria</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">21 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">79 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Annalisa</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">Sub Center Villasimius</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-11">
+  <header class="dh">
+    <h3>Immersione 11 <span class="sep">—</span> Cristo degli Abissi (Portofino)</h3>
+    <time>07/08/2025 09:00</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>18,8 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">50 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">50 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="11"></div><span>Scheda online</span></div>
+  </div>
+
+  
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">11</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">07/08/2025 09:00</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da barca</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Cristo degli Abissi (Portofino)</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">28 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">22 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Nessuna corrente</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">5 kg</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">50 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">18,8 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">14 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">Sì</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">1 x 15 L</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">240 bar</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">70 bar</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Aria</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">21 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">79 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Annalisa Boni, Sara Bonzagni</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">Massub Diving Lavagna</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-12">
+  <header class="dh">
+    <h3>Immersione 12 <span class="sep">—</span> Altare (Portofino)</h3>
+    <time>07/08/2025 11:00</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>21,2 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">45 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">45 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="12"></div><span>Scheda online</span></div>
+  </div>
+
+  
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">12</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">07/08/2025 11:00</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da riva</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Altare (Portofino)</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">28 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">22 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Nessuna corrente</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">5 kg</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">45 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">21,2 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">14 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">Sì</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">1 x 15 L</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">240 bar</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">60 bar</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Aria</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">21 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">79 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Annalisa Boni, Sara Bonzagni</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">Massub Diving Lavagna</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-13">
+  <header class="dh">
+    <h3>Immersione 13 <span class="sep">—</span> Bergeggi #1</h3>
+    <time>17/10/2025 17:55</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>29,3 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">50 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">50 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="13"></div><span>Scheda online</span></div>
+  </div>
+
+  <div class="course"><span>Immersione di corso · istruttore Federico Boni – Ondaonda Diving School ASD</span><b>Advanced 35 – Open Water 01 (Buoyancy)</b></div>
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">13</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">17/10/2025 17:55</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da barca</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Bergeggi #1</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">25 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">20 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Nessuna corrente</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">6 kg</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">50 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">29,3 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">16 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">No</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">12 L</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Aria</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">21 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">79 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Elio</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-14">
+  <header class="dh">
+    <h3>Immersione 14 <span class="sep">—</span> Isola di Giannutri</h3>
+    <time>13/06/2026 10:51</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>25 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">34 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">34 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="14"></div><span>Scheda online</span></div>
+  </div>
+
+  <div class="course"><span>Immersione di corso · istruttore Federico Boni – Ondaonda Diving School ASD</span><b>Advanced 35 – Open Water 03 (Rescue)</b></div>
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">14</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">13/06/2026 10:51</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da riva</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Isola di Giannutri</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">25 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">17 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Nessuna corrente</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">7 kg</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">34 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">25 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">18 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">No</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">200 bar</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">70 bar</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Aria</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">21 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">79 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Anna</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-15">
+  <header class="dh">
+    <h3>Immersione 15 <span class="sep">—</span> Archetti, Isola di Giannutri</h3>
+    <time>13/06/2026 12:52</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>34,8 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">33 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">33 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="15"></div><span>Scheda online</span></div>
+  </div>
+
+  <div class="course"><span>Immersione di corso · istruttore Federico Boni – Ondaonda Diving School ASD</span><b>Advanced 35 – Open Water 04 (Deep)</b></div>
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">15</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">13/06/2026 12:52</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da riva</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Archetti, Isola di Giannutri</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">25 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">16 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Nessuna corrente</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">8 kg</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">33 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">34,8 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">20 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">No</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">200 bar</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">70 bar</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Aria</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">21 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">79 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Anna</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-16">
+  <header class="dh">
+    <h3>Immersione 16 <span class="sep">—</span> Bergeggi</h3>
+    <time>13/06/2026 18:03</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>18 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">56 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">56 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="16"></div><span>Scheda online</span></div>
+  </div>
+
+  <div class="course"><span>Immersione di corso · istruttore Federico Boni – Ondaonda Diving School ASD</span><b>Advanced 35 – Open Water 07 (Navigation)</b></div>
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">16</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">13/06/2026 18:03</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da riva</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Bergeggi</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">25 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">20 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Nessuna corrente</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">6 kg</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">56 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">18 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">15 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">No</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Aria</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">21 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">79 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Elio</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-17">
+  <header class="dh">
+    <h3>Immersione 17 <span class="sep">—</span> Punta Secca, Giannutri</h3>
+    <time>14/06/2026 09:44</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>34,4 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">34 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">34 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="17"></div><span>Scheda online</span></div>
+  </div>
+
+  <div class="course"><span>Immersione di corso · istruttore Federico Boni – Ondaonda Diving School ASD</span><b>Advanced 35 – Open Water 05 (Deep)</b></div>
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">17</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">14/06/2026 09:44</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da riva</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Punta Secca, Giannutri</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">28 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">16 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Corrente leggera</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">7 kg</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">34 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">34,4 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">16 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">No</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Nitrox</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">30 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">70 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Anna</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-18">
+  <header class="dh">
+    <h3>Immersione 18 <span class="sep">—</span> Le Scalette, Giannutri</h3>
+    <time>14/06/2026 12:03</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>31,2 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">41 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">41 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="18"></div><span>Scheda online</span></div>
+  </div>
+
+  <div class="course"><span>Immersione di corso · istruttore Federico Boni – Ondaonda Diving School ASD</span><b>Advanced 35 – Open Water 06 (Elective)</b></div>
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">18</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">14/06/2026 12:03</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da riva</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Le Scalette, Giannutri</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">28 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">16 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Corrente leggera</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">5 kg</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">41 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">31,2 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">14 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">No</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">—</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Nitrox</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">34 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">66 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Anna</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-19">
+  <header class="dh">
+    <h3>Immersione 19 <span class="sep">—</span> Il Diamante (Portofino)</h3>
+    <time>12/07/2026 14:23</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>31,6 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">43 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">43 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="19"></div><span>Scheda online</span></div>
+  </div>
+
+  
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">19</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">12/07/2026 14:23</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da barca</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Il Diamante (Portofino)</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">30 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">23,1 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Nessuna corrente</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">5 kg</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">43 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">31,6 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">16 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">Sì</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">1 x 15 L</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">200 bar</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">50 bar</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Aria</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">21 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">79 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Anna</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">Massub</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+<article class="dive" id="dive-20">
+  <header class="dh">
+    <h3>Immersione 20 <span class="sep">—</span> Secca Gonzatti (Portofino)</h3>
+    <time>13/07/2026 21:24</time>
+  </header>
+
+  <div class="summary">
+    <div class="s big"><b>28 m</b><span>Profondità massima</span></div>
+    <div class="s"><b class="bl">47 min</b><span>ABT — tempo di fondo</span></div>
+    <div class="s"><b class="bl">0 min</b><span>RNT — azoto residuo</span></div>
+    <div class="s"><b class="bl">47 min</b><span>TBT — tempo totale</span></div>
+    <div class="s qr"><div class="qrbox" data-qr="20"></div><span>Scheda online</span></div>
+  </div>
+
+  
+
+  <section class="panel">
+    <h4>Dati generali</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▤</i>Numero dell'immersione</span><span class="fv">20</span></div>
+      <div class="f"><span class="fl"><i class="gr">▤</i>Data e ora</span><span class="fv">13/07/2026 21:24</span></div>
+      <div class="f"><span class="fl"><i class="gr">⚙</i>Configurazione</span><span class="fv">Circuito aperto</span></div>
+      <div class="f"><span class="fl"><i class="or">⚓</i>Tipo di immersione</span><span class="fv">Immersione da barca</span></div>
+      <div class="f"><span class="fl"><i class="rd">⚑</i>Paese</span><span class="fv">Italia</span></div>
+      <div class="f span3"><span class="fl"><i class="cy">⌂</i>Località</span><span class="fv">Secca Gonzatti (Portofino)</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Condizioni</h4>
+    <div class="grid g3">
+      <div class="f"><span class="fl"><i class="yl">☀</i>Condizioni meteorologiche</span><span class="fv">Tempo soleggiato</span></div>
+      <div class="f"><span class="fl"><i class="rd">▮</i>Temperatura aria</span><span class="fv">30 °C</span></div>
+      <div class="f"><span class="fl"><i class="bl">▮</i>Temperatura acqua</span><span class="fv">24 °C</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Condizioni dell'acqua</span><span class="fv">Acqua calma</span></div>
+      <div class="f"><span class="fl"><i class="bl">↕</i>Corrente</span><span class="fv">Nessuna corrente</span></div>
+      <div class="f"><span class="fl"><i class="bl">◉</i>Visibilità</span><span class="fv">Buona visibilità</span></div>
+      <div class="f span3"><span class="fl"><i class="gy">✎</i>Note</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Muta e pesi</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="gy">☺</i>Muta</span><span class="fv">Umida 5mm</span></div>
+      <div class="f"><span class="fl"><i class="yl">▲</i>Zavorra</span><span class="fv">5 kg</span></div>
+    </div>
+  </section>
+
+  <section class="panel blue">
+    <h4>La mia immersione</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="bl">◷</i>Tempo di immersione</span><span class="fv">47 min</span></div>
+      <div class="f"><span class="fl"><i class="or">◷</i>TTS — risalita</span><span class="fv">0 min</span></div>
+      <div class="f"><span class="fl"><i class="bl">↓</i>Profondità massima</span><span class="fv">28 m</span></div>
+      <div class="f"><span class="fl"><i class="rd">▤</i>Profondità media</span><span class="fv">14 m</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">✓</i>Sosta di sicurezza</span><span class="fv">Sì</span></div>
+      <div class="f span2"><span class="fl"><i class="or">⚠</i>Decompressione</span><span class="fv">No</span></div>
+    </div>
+  </section>
+
+  <section class="panel green">
+    <h4>Bombola e gas</h4>
+    <div class="grid g4">
+      <div class="f"><span class="fl"><i class="gy">▯</i>Bombole</span><span class="fv">1 x 15 L</span></div>
+      <div class="f"><span class="fl"><i class="bl">◐</i>Pressione iniziale</span><span class="fv">200 bar</span></div>
+      <div class="f"><span class="fl"><i class="gr">◑</i>Pressione finale</span><span class="fv">50 bar</span></div>
+      <div class="f"><span class="fl"><i class="cy">≈</i>Tasso SAC</span><span class="fv">—</span></div>
+      <div class="f span2"><span class="fl"><i class="gr">▯</i>Miscela</span><span class="fv">Nitrox</span></div>
+      <div class="f"><span class="fl"><i class="rd">●</i>Ossigeno O₂</span><span class="fv">31 %</span></div>
+      <div class="f"><span class="fl"><i class="bl">●</i>Azoto N₂</span><span class="fv">68 %</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h4>Compagni e verifica</h4>
+    <div class="grid g2">
+      <div class="f"><span class="fl"><i class="bl">♟</i>Compagno di immersione</span><span class="fv">Anna</span></div>
+      <div class="f"><span class="fl"><i class="gr">☺</i>Verificato da</span><span class="fv">—</span></div>
+    </div>
+  </section>
+
+  <div class="sign">
+    <div><span>Firma del compagno / buddy</span><hr></div>
+    <div><span>Timbro e firma diving center</span><hr></div>
+  </div>
+</article>
+
+  <footer>
+    Dati esportati dal registro digitale RAID.
+    <a href="https://user.diveraid.com/it/diver/dive_log?asc=false" target="_blank" rel="noopener">Apri il log su diveraid.com</a>
+    — l'accesso richiede le credenziali RAID.
+  </footer>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+(function(){
+  // --- theme ---
+  var root=document.documentElement, btn=document.getElementById('theme');
+  function label(){btn.textContent = root.dataset.theme==='dark' ? 'Passa al tema chiaro' : 'Passa al tema scuro';}
+  try{var saved=localStorage.getItem('logbook-theme'); if(saved){root.dataset.theme=saved;}}catch(e){}
+  label();
+  btn.addEventListener('click',function(){
+    root.dataset.theme = root.dataset.theme==='dark' ? 'light' : 'dark';
+    label();
+    try{localStorage.setItem('logbook-theme',root.dataset.theme);}catch(e){}
+  });
+
+  // --- index navigation ---
+  document.querySelectorAll('tr[data-go]').forEach(function(tr){
+    function go(){var el=document.getElementById(tr.dataset.go); if(el){el.scrollIntoView({block:'start'});}}
+    tr.addEventListener('click',go);
+    tr.addEventListener('keydown',function(e){if(e.key==='Enter'||e.key===' '){e.preventDefault();go();}});
+  });
+
+  // --- QR codes ---
+  // Ogni immersione ha il proprio indirizzo online. Finché non è noto il formato
+  // dell'URL della singola scheda RAID, tutti i QR puntano al registro completo.
+  var DIVE_URL = function(n){ return "https://user.diveraid.com/it/diver/dive_log?asc=false"; };
+  document.querySelectorAll('.qrbox').forEach(function(box){
+    var n = box.getAttribute('data-qr');
+    try{
+      new QRCode(box, {text:DIVE_URL(n), width:120, height:120,
+        colorDark:'#000000', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.M});
+    }catch(e){ box.textContent='QR'; }
+  });
+})();
+</script>
+</body>
+</html>
